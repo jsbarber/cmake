@@ -7,9 +7,13 @@ include(InstallClobberImmune)
 #     Install the file in the typical CMake fashion, but append to the
 #     INSTALLED_CONFIG_FILES cache variable for use with the Mac package's
 #     pre/post install scripts
+#
 #   - If binary packaging is not enabled:
 #     Install the script in a way such that it will check at `make install`
 #     time whether the file does not exist.  See InstallClobberImmune.cmake
+#
+#   - Always create a target "install-example-configs" which installs an
+#     example version of the config file.
 #
 #   _srcfile: the absolute path to the file to install
 #   _dstdir: absolute path to the directory in which to install the file
@@ -39,4 +43,21 @@ macro(InstallPackageConfigFile _srcfile _dstdir _dstfilename)
         # Have `make install` check at run time whether the file does not exist
         InstallClobberImmune(${_srcfile} ${_dstfile})
     endif ()
+
+    if (NOT TARGET install-example-configs)
+        add_custom_target(install-example-configs
+                          COMMENT "Installed example configuration files")
+    endif ()
+
+    # '/' is invalid in target names, so replace w/ '.'
+    string(REGEX REPLACE "/" "." _flatsrc ${_srcfile})
+
+    set(_example ${_dstfile}.example)
+
+    add_custom_target(install-example-config-${_flatsrc}
+        COMMAND "${CMAKE_COMMAND}" -E copy ${_srcfile} \${DESTDIR}${_example}
+        COMMENT "Installing ${_example}")
+
+    add_dependencies(install-example-configs install-example-config-${_flatsrc})
+
 endmacro(InstallPackageConfigFile)

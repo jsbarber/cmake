@@ -2,13 +2,13 @@
 # source and binary packaging
 
 # Sets CPack version variables by splitting the first macro argument
-# using "." as a delimiter.  If the length of the split list is
+# using "." or "-" as a delimiter.  If the length of the split list is
 # greater than 2, all remaining elements are tacked on to the patch
 # level version.  Not that the version set by the macro is internal
 # to binary packaging, the file name of our package will reflect the
 # exact version number.
 macro(SetPackageVersion _version)
-    string(REPLACE "." " " version_numbers ${_version})
+    string(REGEX REPLACE "[.-]" " " version_numbers ${_version})
     separate_arguments(version_numbers)
 
     list(GET version_numbers 0 CPACK_PACKAGE_VERSION_MAJOR)
@@ -43,12 +43,12 @@ macro(SetPackageVersion _version)
 
     if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
         # RPM version accepts letters, but not dashes.
-        string(REGEX REPLACE "[-]" "" CPACK_PACKAGE_VERSION_MAJOR
+        string(REGEX REPLACE "[-]" "." CPACK_PACKAGE_VERSION_MAJOR
                ${CPACK_PACKAGE_VERSION_MAJOR})
-        string(REGEX REPLACE "[-]" "" CPACK_PACKAGE_VERSION_MINOR
+        string(REGEX REPLACE "[-]" "." CPACK_PACKAGE_VERSION_MINOR
                ${CPACK_PACKAGE_VERSION_MINOR})
         if (CPACK_PACKAGE_VERSION_PATCH)
-            string(REGEX REPLACE "[-]" "" CPACK_PACKAGE_VERSION_PATCH
+            string(REGEX REPLACE "[-]" "." CPACK_PACKAGE_VERSION_PATCH
                    ${CPACK_PACKAGE_VERSION_PATCH})
         endif ()
     endif ()
@@ -118,8 +118,8 @@ endmacro(SetPackageFileName)
 
 # Sets up binary package metadata
 macro(SetPackageMetadata)
-    set(CPACK_PACKAGE_VENDOR "Lawrence Berkeley National Laboratory")
-    set(CPACK_PACKAGE_CONTACT "info@bro-ids.org")
+    set(CPACK_PACKAGE_VENDOR "International Computer Science Institute")
+    set(CPACK_PACKAGE_CONTACT "info@bro.org")
     set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
         "The Bro Network Intrusion Detection System")
 
